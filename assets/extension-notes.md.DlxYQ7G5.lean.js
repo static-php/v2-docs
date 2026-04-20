@@ -1,0 +1,1 @@
+import{_ as e,o as t,c as n}from"./chunks/framework.DiFrMNaY.js";const m=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"extension-notes.md","filePath":"extension-notes.md"}'),o={name:"extension-notes.md"};function s(a,r,c,i,p,_){return t(),n("div")}const f=e(o,[["render",s]]);export{m as __pageData,f as default};
