@@ -24,7 +24,8 @@ The following is the source download configuration corresponding to the `libeven
     "type": "ghrel",
     "repo": "libevent/libevent",
     "match": "libevent.+\\.tar\\.gz",
-    "license": {
+    "provide-pre-built": true,
+      "license": {
       "type": "file",
       "path": "LICENSE"
     }
@@ -35,6 +36,7 @@ The following is the source download configuration corresponding to the `libeven
 The most important field here is `type`. Currently, the types it supports are:
 
 - `url`: Directly use URL to download, for example: `https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz`.
+- `pie`: Download PHP extensions from Packagist using the PIE (PHP Installer for Extensions) standard.
 - `ghrel`: Use the GitHub Release API to download, download the artifacts uploaded from the latest version released by maintainers.
 - `ghtar`: Use the GitHub Release API to download. 
     Different from `ghrel`, `ghtar` is downloaded from the `source code (tar.gz)` in the latest Release of the project.
@@ -55,6 +57,8 @@ Each source file in source.json has the following params:
 - `license`: the open source license of the source code, see **Open Source License** section below
 - `type`: must be one of the types mentioned above
 - `path` (optional): release the source code to the specified directory instead of `source/{name}`
+- `provide-pre-built` (optional): whether to provide precompiled binary files. 
+    If `true`, it will automatically try to download precompiled binary files when running `bin/spc download`
 
 ::: tip
 The `path` parameter in `source.json` can specify a relative or absolute path. When specified as a relative path, the path is based on `source/`.
@@ -85,6 +89,37 @@ Example (download the imagick extension and extract it to the extension storage 
    }
 }
 ```
+
+## Download type - pie
+
+PIE (PHP Installer for Extensions) type sources refer to downloading PHP extensions from Packagist that follow the PIE standard.
+This method automatically fetches extension information from the Packagist repository and downloads the appropriate distribution file.
+
+The parameters included are:
+
+- `repo`: The Packagist vendor/package name, such as `vendor/package-name`
+
+Example (download a PHP extension from Packagist using PIE):
+
+```json
+{
+  "ext-example": {
+    "type": "pie",
+    "repo": "vendor/example-extension",
+    "path": "php-src/ext/example",
+    "license": {
+      "type": "file",
+      "path": "LICENSE"
+    }
+  }
+}
+```
+
+::: tip
+The PIE download type will automatically detect the extension information from Packagist metadata, 
+including the download URL, version, and distribution type. 
+The extension must be marked as `type: php-ext` or contain `php-ext` metadata in its Packagist package definition.
+:::
 
 ## Download type - ghrel
 
@@ -312,5 +347,26 @@ When an open source project has multiple licenses, multiple files can be specifi
        }
      ]
    }
+}
+```
+
+When the license of an open source project uses different files between versions, 
+`path` can be used as an array to list the possible license files:
+
+```json
+{
+  "redis": {
+    "type": "git",
+    "path": "php-src/ext/redis",
+    "rev": "release/6.0.2",
+    "url": "https://github.com/phpredis/phpredis",
+    "license": {
+      "type": "file",
+      "path": [
+        "LICENSE",
+        "COPYING"
+      ]
+    }
+  }
 }
 ```

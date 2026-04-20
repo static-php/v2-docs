@@ -5,13 +5,13 @@
 
 ```bash
 # Install dependencies
-yarn
+npm i
 
 # Dev mode
-yarn docs:dev
+npm run docs:dev
 
 # Build mode, target: docs/.vitepress/dist/
-yarn docs:build
+npm run docs:build
 ```
 ## Note
 

@@ -1,3 +1,7 @@
+---
+outline: 'deep'
+---
+
 # Build (Linux, macOS, FreeBSD)
 
 This section covers the build process for Linux, macOS, and FreeBSD. If you want to build on Windows, 
@@ -14,15 +18,15 @@ Here's how to download from self-hosted server:
 ```bash
 # Download from self-hosted nightly builds (sync with main branch)
 # For Linux x86_64
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
 # For Linux aarch64
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-aarch64
 # macOS x86_64 (Intel)
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-x86_64
 # macOS aarch64 (Apple)
-curl -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
+curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-macos-aarch64
 # Windows (x86_64, win10 build 17063 or later)
-curl.exe -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
+curl.exe -fsSL -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-windows-x64.exe
 
 # Add execute perm (Linux and macOS only)
 chmod +x ./spc
@@ -57,56 +61,6 @@ cd static-php-cli
 composer update
 ```
 
-### Use System PHP
-
-Below are some example commands for installing PHP and Composer in the system. 
-It is recommended to search for the specific installation method yourself or ask the AI search engine to obtain the answer, 
-which will not be elaborated here.
-
-```bash
-# [macOS], need install Homebrew first. See https://brew.sh/
-# Remember change your composer executable path. For M1/M2 Chip mac, "/opt/homebrew/bin/", for Intel mac, "/usr/local/bin/". Or add it to your own path.
-brew install php wget
-wget https://getcomposer.org/download/latest-stable/composer.phar -O /path/to/your/bin/composer && chmod +x /path/to/your/bin/composer
-
-# [Debian], you need to make sure your php version >= 8.1 and composer >= 2.0
-sudo apt install php-cli composer php-tokenizer
-
-# [Alpine]
-apk add bash file wget xz php81 php81-common php81-pcntl php81-tokenizer php81-phar php81-posix php81-xml composer
-```
-
-::: tip
-Currently, some versions of Ubuntu install older PHP versions, 
-so no installation commands are provided. If necessary, it is recommended to add software sources such as ppa first, 
-and then install the latest version of PHP and tokenizer, XML, and phar extensions.
-
-Older versions of Debian may have an older (<= 7.4) version of PHP installed by default, it is recommended to upgrade Debian first.
-:::
-
-### Use Docker
-
-If you don't want to install PHP and Composer runtime environment on your system, you can use the built-in Docker environment build script.
-
-```bash
-# To use directly, replace `bin/spc` with `bin/spc-alpine-docker` in all used commands
-bin/spc-alpine-docker
-```
-
-The first time the command is executed, `docker build` will be used to build a Docker image. 
-The default built Docker image is the `x86_64` architecture, and the image name is `cwcc-spc-x86_64`.
-
-If you want to build `aarch64` static-php-cli in `x86_64` environment, 
-you can use qemu to emulate the arm image to run Docker, but the speed will be very slow.
-Use command: `SPC_USE_ARCH=aarch64 bin/spc-alpine-docker`.
-
-If it prompts that sudo is required to run after running, 
-execute the following command once to grant static-php-cli permission to execute sudo:
-
-```bash
-export SPC_USE_SUDO=yes
-```
-
 ### Use Precompiled Static PHP Binaries
 
 If you don't want to use Docker and install PHP in the system, 
@@ -133,17 +87,109 @@ This script will download two files in total: `bin/php` and `bin/composer`. Afte
 it is equivalent to installing PHP in the system, you can directly Use commands such as `composer`, `php -v`, or directly use `bin/spc`.
 2. Direct call, such as executing static-php-cli command: `bin/php bin/spc --help`, executing Composer: `bin/php bin/composer update`.
 
-## Command - download
+### Use Docker
+
+If you don't want to install PHP and Composer runtime environment on your system, you can use the built-in Docker environment build script.
+
+```bash
+# To use directly, replace `bin/spc` with `bin/spc-alpine-docker` in all used commands
+bin/spc-alpine-docker
+```
+
+The first time the command is executed, `docker build` will be used to build a Docker image.
+The default built Docker image is the `x86_64` architecture, and the image name is `cwcc-spc-x86_64`.
+
+If you want to build `aarch64` static-php-cli in `x86_64` environment,
+you can use qemu to emulate the arm image to run Docker, but the speed will be very slow.
+Use command: `SPC_USE_ARCH=aarch64 bin/spc-alpine-docker`.
+
+If it prompts that sudo is required to run after running,
+execute the following command once to grant static-php-cli permission to execute sudo:
+
+```bash
+export SPC_USE_SUDO=yes
+```
+
+### Use System PHP
+
+Below are some example commands for installing PHP and Composer in the system.
+It is recommended to search for the specific installation method yourself or ask the AI search engine to obtain the answer,
+which will not be elaborated here.
+
+```bash
+# [macOS], need install Homebrew first. See https://brew.sh/
+# Remember change your composer executable path. For M1/M2 Chip mac, "/opt/homebrew/bin/", for Intel mac, "/usr/local/bin/". Or add it to your own path.
+brew install php wget
+wget https://getcomposer.org/download/latest-stable/composer.phar -O /path/to/your/bin/composer && chmod +x /path/to/your/bin/composer
+
+# [Debian], you need to make sure your php version >= 8.1 and composer >= 2.0
+sudo apt install php-cli composer php-tokenizer
+
+# [Alpine]
+apk add bash file wget xz php81 php81-common php81-pcntl php81-tokenizer php81-phar php81-posix php81-xml composer
+```
+
+::: tip
+Currently, some versions of Ubuntu install older PHP versions,
+so no installation commands are provided. If necessary, it is recommended to add software sources such as ppa first,
+and then install the latest version of PHP and tokenizer, XML, and phar extensions.
+
+Older versions of Debian may have an older (<= 7.4) version of PHP installed by default, it is recommended to upgrade Debian first.
+:::
+
+## Build with craft (recommended)
+
+Using `bin/spc craft`, you can use a configuration file and a command to automatically check the environment, download source code, build dependency libraries, build PHP and extensions, etc.
+
+You need to write a `craft.yml` file and save it in the current working directory. `craft.yml` can be generated by [command generator](./cli-generator) or written manually.
+
+For manual writing, please refer to the comments in [craft.yml configuration](../develop/craft-yml.md) to write it. 
+Let's assume that you compile an extension combination and choose PHP 8.4, outputting `cli` and `fpm`:
+
+```yaml
+# path/to/craft.yml
+php-version: 8.4
+extensions: bcmath,posix,phar,zlib,openssl,curl,fileinfo,tokenizer
+sapi:
+  - cli
+  - fpm
+```
+
+Then use the `bin/spc craft` command to compile:
+
+```bash
+bin/spc craft --debug
+```
+
+If the build is successful, you will see the `buildroot/bin` directory in the current directory, which contains the compiled PHP binary file, or the corresponding SAPI.
+
+- cli: The build result is `buildroot/bin/php.exe` on Windows and `buildroot/bin/php` on other platforms.
+- fpm: The build result is `buildroot/bin/php-fpm`.
+- micro: The build result is `buildroot/bin/micro.sfx`. If you need to further package it with PHP code, please refer to [Packaging micro binary](./manual-build#command-micro-combine).
+- embed: See [Using embed](./manual-build#embed-usage).
+- frankenphp: The build result is `buildroot/bin/frankenphp`.
+
+If the build fails, you can use the `--debug` parameter to view detailed error information, 
+or use the `--with-clean` to clear the old compilation results and recompile.
+
+If the build still fails to use the above method, please submit an issue and attach your `craft.yml` and `./log` archive.
+
+## Step-by-step build command
+
+If you have customized requirements, or the need to download and compile PHP and dependent libraries separately, you can use the `bin/spc` command to execute step by step.
+
+### Command download - Download dependency packages
 
 Use the command `bin/spc download` to download the source code required for compilation, 
 including php-src and the source code of various dependent libraries.
 
 ```bash
-# Download all dependencies
+# Download all dependencies, defaults to php 8.4
 bin/spc download --all
 
-# Download all dependent packages, and specify the main version of PHP to download, optional: 7.3, 7.4, 8.0, 8.1, 8.2, 8.3
-bin/spc download --all --with-php=8.2
+# Download all dependent packages, and specify the main version of PHP to download, optional: 8.1, 8.2, 8.3, 8.4
+# Also supports specific version of php release: 8.3.10, 8.2.22, etc.
+bin/spc download --all --with-php=8.3
 
 # Show download progress bar while downloading (curl)
 bin/spc download --all --debug
@@ -157,6 +203,9 @@ bin/spc download php-src,micro,zstd,ext-zstd
 # Download only extensions and libraries to be compiled (use extensions, including suggested libraries)
 bin/spc download --for-extensions=openssl,swoole,zip,pcntl,zstd
 
+# Download resources, prefer to download dependencies with pre-built packages (reduce the time to compile dependencies)
+bin/spc download --for-extensions="curl,pcntl,xml,mbstring" --prefer-pre-built
+
 # Download only the extensions and dependent libraries to be compiled (use extensions, excluding suggested libraries)
 bin/spc download --for-extensions=openssl,swoole,zip,pcntl --without-suggestions
 
@@ -167,7 +216,7 @@ bin/spc download  --for-libs=liblz4,libevent --for-extensions=pcntl,rar,xml
 bin/spc download --for-libs=liblz4,libevent --without-suggestions
 
 # When downloading sources, ignore some source caches (always force download, e.g. switching PHP version)
-bin/spc download --for-extensions=curl,pcntl,xml --ignore-cache-sources=php-src --with-php=8.3
+bin/spc download --for-extensions=curl,pcntl,xml --ignore-cache-sources=php-src --with-php=8.3.10
 
 # Set retry times (default is 0)
 bin/spc download --all --retry=2
@@ -193,14 +242,27 @@ Also, it is available when downloading with the `--for-extensions` option.
 
 
 ```bash
-# Specifying to download a beta version of PHP8.3
-bin/spc download --all -U "php-src:https://downloads.php.net/~eric/php-8.3.0beta1.tar.gz"
+# Specifying to download a alpha version of PHP 8.5
+bin/spc download --all -U "php-src:https://downloads.php.net/~edorian/php-8.5.0alpha2.tar.xz"
 
 # Specifying to download an older version of the curl library
 bin/spc download --all -U "curl:https://curl.se/download/curl-7.88.1.tar.gz"
 ```
 
-## Command - doctor
+If the source you download is not a link, but a git repository, you can use `-G` or `--custom-git` to rewrite the download link,
+so that the downloader can force the use of the specified git repository to download packages from this source.
+The usage method is `{source-name}:{branch}:{url}`, which can rewrite the download link of multiple libraries at the same time. 
+It is also available when downloading with the `--for-extensions` option.
+
+```bash
+# Specifying to download the source code of the PHP extension from the specified branch of the git repository
+bin/spc download --for-extensions=redis -G "php-src:master:https://github.com/php/php-src.git"
+
+# Download the latest code from the master branch of the swoole-src repository instead of PECL release version
+bin/spc download --for-extensions=swoole -G "swoole:master:https://github.com/swoole/swoole-src.git"
+```
+
+### Command - doctor
 
 If you can run `bin/spc` normally but cannot compile static PHP or dependent libraries normally, 
 you can run `bin/spc doctor` first to check whether the system itself lacks dependencies.
@@ -213,13 +275,13 @@ bin/spc doctor
 bin/spc doctor --auto-fix
 ```
 
-## Command - build
+### Command - build
 
 Use the build command to start building the static php binary. 
 Before executing the `bin/spc build` command, be sure to use the `download` command to download sources. 
 It is recommended to use `doctor` to check the environment.
 
-### Basic build
+#### Basic build
 
 You need to go to [Extension List](./extensions) or [Command Generator](./cli-generator) to select the extension you want to add, 
 and then use the command `bin/spc build` to compile. 
@@ -227,8 +289,10 @@ You need to specify a compilation target, choose from the following parameters:
 
 - `--build-cli`: Build a cli sapi (command line interface, which can execute PHP code on the command line)
 - `--build-fpm`: Build a fpm sapi (php-fpm, used in conjunction with other traditional fpm architecture software such as nginx)
+- `--build-cgi`: Build a cgi sapi (cgi, rarely used)
 - `--build-micro`: Build a micro sapi (used to build a standalone executable binary containing PHP code)
 - `--build-embed`: Build an embed sapi (used to embed into other C language programs)
+- `--build-frankenphp`: Build a [FrankenPHP](https://github.com/php/frankenphp) executable
 - `--build-all`: build all above sapi
 
 ```bash
@@ -255,27 +319,18 @@ If you want to build multiple versions of PHP and don't want to build other depe
 you can use `switch-php-version` to quickly switch to another version and compile after compiling one version:
 
 ```shell
-# switch to 8.3
-bin/spc switch-php-version 8.3
+# switch to 8.4
+bin/spc switch-php-version 8.4
 # build
 bin/spc build bcmath,curl,openssl,ftp,posix,pcntl --build-cli
-# switch to 8.0
-bin/spc switch-php-version 8.0
+# switch to 8.1
+bin/spc switch-php-version 8.1
 # build
 bin/spc build bcmath,curl,openssl,ftp,posix,pcntl --build-cli
 ```
 :::
 
-### Debug
-
-If you encounter problems during the compilation process, or want to view each executing shell command, 
-you can use `--debug` to enable debug mode and view all terminal logs:
-
-```bash
-bin/spc build mysqlnd,pdo_mysql --build-all --debug
-```
-
-### Build Options
+#### Build Options
 
 During the compilation process, in some special cases, 
 the compiler and the content of the compilation directory need to be intervened. 
@@ -285,8 +340,10 @@ You can try to use the following commands:
 - `--cxx=XXX`: Specifies the execution command of the C++ language compiler (Linux defaults to `g++`, macOS defaults to `clang++`)
 - `--with-clean`: clean up old make files before compiling PHP
 - `--enable-zts`: Make compiled PHP thread-safe version (default is NTS version)
-- `--no-strip`: Do not run `strip` after compiling the PHP library to trim the binary file to reduce its size (the macOS binary file without trim can use dynamically linked third-party extensions)
+- `--no-strip`: Do not run `strip` after compiling the PHP library to trim the binary file to reduce its size
 - `--with-libs=XXX,YYY`: Compile the specified dependent library before compiling PHP, and activate some extended optional functions (such as libavif of the gd library, etc.)
+- `--with-config-file-path=XXX`: Set the path in which to look for `php.ini` (Check [here](../faq/index.html#what-is-the-path-of-php-ini) for default paths)
+- `--with-config-file-scan-dir=XXX`: Set the directory to scan for `.ini` files after reading `php.ini` (Check [here](../faq/index.html#what-is-the-path-of-php-ini) for default paths)
 - `-I xxx=yyy`: Hard compile INI options into PHP before compiling (support multiple options, alias is `--with-hardcoded-ini`)
 - `--with-micro-fake-cli`: When compiling micro, let micro's `PHP_SAPI` pretend to be `cli` (for compatibility with some programs that check `PHP_SAPI`)
 - `--disable-opcache-jit`: Disable opcache jit (enabled by default)
@@ -295,11 +352,21 @@ You can try to use the following commands:
 - `--with-suggested-exts`: Add `ext-suggests` as dependencies when compiling
 - `--with-suggested-libs`: Add `lib-suggests` as dependencies when compiling
 - `--with-upx-pack`: Use UPX to reduce the size of the binary file after compilation (you need to use `bin/spc install-pkg upx` to install upx first)
+- `--build-shared=XXX,YYY`: compile the specified extension into a shared library (the default is to compile into a static library)
 
 For hardcoding INI options, it works for cli, micro, embed sapi. Here is a simple example where we preset a larger `memory_limit` and disable the `system` function:
 
 ```bash
 bin/spc build bcmath,pcntl,posix --build-all -I "memory_limit=4G" -I "disable_functions=system"
+```
+
+## Debug
+
+If you encounter problems during the compilation process, or want to view each executing shell command,
+you can use `--debug` to enable debug mode and view all terminal logs:
+
+```bash
+bin/spc build mysqlnd,pdo_mysql --build-all --debug
 ```
 
 ## Command - micro:combine
@@ -378,6 +445,31 @@ manually unpack and copy the package to a specified location, and we can use com
 bin/spc extract php-src,libxml2
 ```
 
+## Command - dump-extensions
+
+Use the command `bin/spc dump-extensions` to export required extensions of the current project.
+
+```bash
+# Print the extension list of the project, pass in the root directory of the project containing composer.json
+bin/spc dump-extensions /path/to/your/project/
+
+# Print the extension list of the project, excluding development dependencies
+bin/spc dump-extensions /path-to/tour/project/ --no-dev
+
+# Output in the extension list format acceptable to the spc command (comma separated)
+bin/spc dump-extensions /path-to/tour/project/ --format=text
+
+# Output as a JSON list
+bin/spc dump-extensions /path-to/tour/project/ --format=json
+
+# When the project does not have any extensions, output the specified extension combination instead of returning failure
+bin/spc dump-extensions /path-to/your/project/ --no-ext-output=mbstring,posix,pcntl,phar
+
+# Do not exclude extensions not supported by spc when outputting
+bin/spc dump-extensions /path/to/your/project/ --no-spc-filter
+```
+It should be noted that the project directory must contain the `vendor/installed.json` and `composer.lock` files, otherwise they cannot be found normally.
+
 ## Dev Command - dev
 
 Debug commands refer to a collection of commands that can assist in outputting some information 
@@ -388,6 +480,8 @@ when you use static-php-cli to build PHP or modify and enhance the static-php-cl
 - `dev:sort-config`: Sort the list of configuration files in the `config/` directory in alphabetical order
 - `dev:lib-ver <lib-name>`: Read the version from the source code of the dependency library (only available for specific dependency libraries)
 - `dev:ext-ver <ext-name>`: Read the corresponding version from the source code of the extension (only available for specific extensions)
+- `dev:pack-lib <lib-name>`: Package the specified library into a tar.gz file (maintainer only)
+- `dev:gen-ext-docs`: Generate extension documentation (maintainer only)
 
 ```bash
 # output all extensions information
@@ -418,6 +512,8 @@ When `bin/spc doctor` automatically repairs the Windows environment, tools such 
 Here is an example of installing the tool:
 
 - Download and install UPX (Linux and Windows only): `bin/spc install-pkg upx`
+- Download and install nasm (Windows only): `bin/spc install-pkg nasm`
+- Download and install go-xcaddy: `bin/spc install-pkg go-xcaddy`
 
 ## Command - del-download
 
@@ -453,22 +549,24 @@ otherwise it will be executed repeatedly in other events.
 
 The following are the supported `patch_point` event names and corresponding locations:
 
-| Event name                   | Event description                                                                                  |
-|------------------------------|----------------------------------------------------------------------------------------------------|
-| before-libs-extract          | Triggered before the dependent libraries extracted                                                 |
-| after-libs-extract           | Triggered after the compiled dependent libraries extracted                                         |
-| before-php-extract           | Triggered before PHP source code extracted                                                         |
-| after-php-extract            | Triggered after PHP source code extracted                                                          |
-| before-micro-extract         | Triggered before phpmicro extract                                                                  |
-| after-micro-extract          | Triggered after phpmicro extracted                                                                 |
-| before-exts-extract          | Triggered before the extension (to be compiled) extracted to the PHP source directory              |
-| after-exts-extract           | Triggered after the extension extracted to the PHP source directory                                |
-| before-library[*name*]-build | Triggered before the library named `name` is compiled (such as `before-library[postgresql]-build`) |
-| after-library[*name*]-build  | Triggered after the library named `name` is compiled                                               |
-| before-php-buildconf         | Triggered before compiling PHP command `./buildconf`                                               |
-| before-php-configure         | Triggered before compiling PHP command `./configure`                                               |
-| before-php-make              | Triggered before compiling PHP command `make`                                                      |
-| before-sanity-check          | Triggered after compiling PHP but before running extended checks                                   |
+| Event name                      | Event description                                                                                  |
+|---------------------------------|----------------------------------------------------------------------------------------------------|
+| before-libs-extract             | Triggered before the dependent libraries extracted                                                 |
+| after-libs-extract              | Triggered after the compiled dependent libraries extracted                                         |
+| before-php-extract              | Triggered before PHP source code extracted                                                         |
+| after-php-extract               | Triggered after PHP source code extracted                                                          |
+| before-micro-extract            | Triggered before phpmicro extract                                                                  |
+| after-micro-extract             | Triggered after phpmicro extracted                                                                 |
+| before-exts-extract             | Triggered before the extension (to be compiled) extracted to the PHP source directory              |
+| after-exts-extract              | Triggered after the extension extracted to the PHP source directory                                |
+| before-library[*name*]-build    | Triggered before the library named `name` is compiled (such as `before-library[postgresql]-build`) |
+| after-library[*name*]-build     | Triggered after the library named `name` is compiled                                               |
+| after-shared-ext[*name*]-build  | Triggered after the shared extension named `name` is compiled                                      |
+| before-shared-ext[*name*]-build | Triggered before the shared extension named `name` is compiled                                     |
+| before-php-buildconf            | Triggered before compiling PHP command `./buildconf`                                               |
+| before-php-configure            | Triggered before compiling PHP command `./configure`                                               |
+| before-php-make                 | Triggered before compiling PHP command `make`                                                      |
+| before-sanity-check             | Triggered after compiling PHP but before running extended checks                                   |
 
 The following is a simple example of temporarily modifying the PHP source code. 
 Enable the CLI function to search for the `php.ini` configuration in the current working directory:
@@ -523,3 +621,85 @@ Commonly used objects and functions using the `-P` function are:
 static-php-cli has many open methods, which cannot be listed in the docs, 
 but as long as it is a `public function` and is not marked as `@internal`, it theoretically can be called.
 :::
+
+## Multiple builds
+
+If you need to build multiple times locally, the following method can save you time downloading resources and compiling.
+
+- If you only switch the PHP version without changing the dependent libraries, you can use `bin/spc switch-php-version` to quickly switch the PHP version, and then re-run the same `build` command.
+- If you want to rebuild once, but do not re-download the source code, you can first `rm -rf buildroot source` to delete the compilation directory and source code directory, and then rebuild.
+- If you want to update a version of a dependency, you can use `bin/spc del-download <source-name>` to delete the specified source code, and then use `download <source-name>` to download it again.
+- If you want to update all dependent versions, you can use `bin/spc download --clean` to delete all downloaded sources, and then download them again.
+
+## embed usage
+
+If you want to embed static-php into other C language programs, you can use `--build-embed` to build an embed version of PHP.
+
+```bash
+bin/spc build {your extensions} --build-embed --debug
+```
+
+Under normal circumstances, PHP embed will generate `php-config` after compilation. 
+For static-php, we provide `spc-config` to obtain the parameters during compilation.
+In addition, when using embed SAPI (libphp.a), you need to use the same compiler as libphp, otherwise there will be a link error.
+
+Here is the basic usage of spc-config:
+
+```bash
+# output all flags and options
+bin/spc spc-config curl,zlib,phar,openssl
+
+# output libs
+bin/spc spc-config curl,zlib,phar,openssl --libs
+
+# output includes
+bin/spc spc-config curl,zlib,phar,openssl --includes
+```
+
+By default, static-php uses the following compilers on different systems:
+
+- macOS: `clang`
+- Linux (Alpine Linux): `gcc`
+- Linux (glibc based distros, x86_64): `/usr/local/musl/bin/x86_64-linux-musl-gcc`
+- Linux (glibc based distros, aarch64): `/usr/local/musl/bin/aarch64-linux-musl-gcc`
+- FreeBSD: `clang`
+
+Here is an example of using embed SAPI:
+
+```c
+// embed.c
+#include <sapi/embed/php_embed.h>
+
+int main(int argc,char **argv){
+
+    PHP_EMBED_START_BLOCK(argc,argv)
+
+    zend_file_handle file_handle;
+
+    zend_stream_init_filename(&file_handle,"embed.php");
+
+    if(php_execute_script(&file_handle) == FAILURE){
+        php_printf("Failed to execute PHP script.\n");
+    }
+
+    PHP_EMBED_END_BLOCK()
+    return 0;
+}
+```
+
+
+```php
+<?php 
+// embed.php
+echo "Hello world!\n";
+```
+
+```bash
+# compile in debian/ubuntu x86_64
+/usr/local/musl/bin/x86_64-linux-musl-gcc embed.c $(bin/spc spc-config bcmath,zlib) -static -o embed
+# compile in macOS/FreeBSD
+clang embed.c $(bin/spc spc-config bcmath,zlib) -o embed
+
+./embed
+# out: Hello world!
+```

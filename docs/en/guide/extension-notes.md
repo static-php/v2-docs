@@ -6,6 +6,8 @@ which will be listed one by one here.
 
 ## curl
 
+HTTP3 support is not enabled by default, compile with `--with-libs="nghttp2,nghttp3,ngtcp2"` to enable HTTP3 support for PHP >= 8.4.
+
 When using curl to request HTTPS, there may be an `error:80000002:system library::No such file or directory` error.
 For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use-ssl).
 
@@ -44,15 +46,27 @@ If you use `swoole,swoole-hook-sqlite`, you will enable the coroutine mode of Sw
 swoole-hook-sqlite conflicts with the `pdo_sqlite` extension. If you want to use Swoole and `pdo_sqlite`, please delete the pdo_sqlite extension and enable `swoole` and `swoole-hook-sqlite`.
 This extension contains an implementation of the coroutine environment for `pdo_sqlite`.
 
+## swoole-hook-odbc
+
+swoole-hook-odbc is not an extension, it's a Hook feature of Swoole.
+If you use `swoole,swoole-hook-odbc`, you will enable the coroutine mode of Swoole's `odbc` extension.
+
+swoole-hook-odbc conflicts with the `pdo_odbc` extension. If you want to use Swoole and `pdo_odbc`, please delete the `pdo_odbc` extension and enable `swoole` and `swoole-hook-odbc`.
+This extension contains an implementation of the coroutine environment for `pdo_odbc`.
+
 ## swow
 
-1. Only PHP version >= 8.0 is supported.
+1. Only PHP 8.0+ is supported.
+
+## imagick
+
+1. OpenMP support is disabled, this is recommended by the maintainers and also the case system packages.
 
 ## imap
 
 1. Kerberos is not supported
-2. ext-imap is not thread safe due to the underlying c-client. It's not possible to use it in --enable-zts builds.
-3. Because the extension may be dropped from php, we recommend you look for an alternative implementation, such as [Webklex/php-imap](https://github.com/Webklex/php-imap)
+2. ext-imap is not thread safe due to the underlying c-client. It's not possible to use it in `--enable-zts` builds.
+3. The extension was dropped from php 8.4, we recommend you look for an alternative implementation, such as [Webklex/php-imap](https://github.com/Webklex/php-imap)
 
 ## gd
 
@@ -76,11 +90,9 @@ and this extension cannot be compiled into php by static linking, so it cannot b
 
 ## xdebug
 
-1. Xdebug is a Zend extension. The functions of Xdebug depend on PHP's Zend engine and underlying code. 
-If you want to statically compile it into PHP, you may need a huge amount of patch code, which is not feasible.
-2. The macOS platform can compile an xdebug extension under PHP compiled on the same platform, 
-extract the `xdebug.so` file, and then use the `--no-strip` parameter in static-php-cli to retain the debug symbol table and add the `ffi` extension. 
-The compiled `./php` binary can be configured and run by specifying the INI, eg `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`.
+1. Xdebug is only buildable as a shared extension. On Linux, you'll need to use a SPC_TARGET like `native-native -dynamic` or `native-native-gnu`.
+2. When using Linux/glibc or macOS, you can compile Xdebug as a shared extension using --build-shared="xdebug". 
+   The compiled `./php` binary can be configured and run by specifying the INI, eg `./php -d 'zend_extension=/path/to/xdebug.so' your-code.php`.
 
 ## xml
 
@@ -118,13 +130,13 @@ For details on the solution, see [FAQ - Unable to use ssl](../faq/#unable-to-use
 
 ## password-argon2
 
-1. password-argon2 is not a standard extension, it is an additional algorithm for the `password_hash` function.
-2. On Linux systems, `password-argon2` dependency `libargon2` conflicts with the `libsodium` library.
+1. password-argon2 is not a standard extension. The algorithm `PASSWORD_ARGON2ID` for the `password_hash` function needs libsodium or libargon2 to work.
+2. using password-argon2 enables multithread support for this.
 
 ## ffi
 
-1. Linux not supported yet: Due to limitations of the Linux system, although the ffi extension can be compiled successfully, it cannot be used to load other `so` extensions. 
-   The prerequisite for Linux to support loading `so` extensions is dynamic compilation, but dynamic compilation conflicts with the purpose of this project.
+1. Due to the limitation of musl libc's static linkage, you cannot use ffi because dynamic libraries cannot be loaded. 
+   If you need to use the ffi extension, see [Compile PHP with GNU libc](./build-with-glibc).
 2. macOS supports the ffi extension, but errors will occur when some kernels do not contain debugging symbols.
 3. Windows x64 supports the ffi extension.
 
@@ -144,3 +156,13 @@ If you enable event extension on macOS, the `openpty` will be disabled due to is
 ## parallel
 
 Parallel is only supported on PHP 8.0 ZTS and above.
+
+## spx
+
+1. SPX does not support Windows, and the official repository does not support static compilation. static-php-cli uses a [modified version](https://github.com/static-php/php-spx).
+
+## mimalloc
+
+1. This is not technically an extension, but a library.
+2. Building with `--with-libs="mimalloc"` on Linux or macOS will override the default allocator.
+3. This is experimental for now, but is recommended in threaded environments.

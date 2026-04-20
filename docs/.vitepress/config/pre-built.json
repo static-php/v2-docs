@@ -1,5 +1,7 @@
 {
     "repo": "static-php/static-php-cli-hosted",
-    "match-pattern": "{name}-{arch}-{os}.tgz",
-    "pack-config": {}
+    "prefer-stable": true,
+    "match-pattern-linux": "{name}-{arch}-{os}-{libc}-{libcver}.txz",
+    "match-pattern-macos": "{name}-{arch}-{os}.txz",
+    "match-pattern-windows": "{name}-{arch}-{os}.tgz"
 }

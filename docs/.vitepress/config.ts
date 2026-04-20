@@ -4,8 +4,9 @@ import sidebarZh from "./sidebar.zh";
 
 // https://vitepress.dev/reference/site-config
 export default {
-  title: "static-php-cli",
+  title: "Static PHP",
   description: "Build single static PHP binary, with PHP project together, with popular extensions included.",
+  base: '/v2-docs/',
   locales: {
     en: {
       label: 'English',
@@ -13,7 +14,7 @@ export default {
       themeConfig: {
         nav: [
           {text: 'Guide', link: '/en/guide/',},
-          {text: 'Developing', link: '/en/develop/'},
+          {text: 'Advanced', link: '/en/develop/'},
           {text: 'Contributing', link: '/en/contributing/'},
           {text: 'FAQ', link: '/en/faq/'},
         ],
@@ -30,7 +31,7 @@ export default {
       themeConfig: {
         nav: [
           {text: '构建指南', link: '/zh/guide/'},
-          {text: '开发指南', link: '/zh/develop/'},
+          {text: '进阶', link: '/zh/develop/'},
           {text: '贡献', link: '/zh/contributing/'},
           {text: 'FAQ', link: '/zh/faq/'},
         ],
@@ -44,9 +45,22 @@ export default {
   },
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
+    logo: '/images/static-php_nobg.png',
     nav: [],
     socialLinks: [
       {icon: 'github', link: 'https://github.com/crazywhalecc/static-php-cli'}
-    ]
+    ],
+    footer: {
+      message: 'Released under the MIT License.',
+      copyright: 'Copyright © 2023-present crazywhalecc'
+    },
+    search: {
+      provider: 'algolia',
+      options: {
+        appId: 'IHJHUB1SF1',
+        apiKey: '8266d31cc2ffbd0e059f1c6e5bdaf8fc',
+        indexName: 'static-php docs',
+      },
+    },
   }
 }

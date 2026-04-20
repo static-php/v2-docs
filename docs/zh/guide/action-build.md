@@ -5,6 +5,7 @@ Action 构建指的是直接使用 GitHub Action 进行编译。
 如果你不想自行编译，可以从本项目现有的 Action 下载 Artifact，也可以从自托管的服务器下载：[进入](https://dl.static-php.dev/static-php-cli/common/)
 
 > 自托管的二进制也是由 Action 构建而来，[项目仓库地址](https://github.com/static-php/static-php-cli-hosted)。
+> 包含的扩展有：bcmath,bz2,calendar,ctype,curl,dom,exif,fileinfo,filter,ftp,gd,gmp,iconv,xml,mbstring,mbregex,mysqlnd,openssl,pcntl,pdo,pdo_mysql,pdo_sqlite,phar,posix,redis,session,simplexml,soap,sockets,sqlite3,tokenizer,xmlwriter,xmlreader,zlib,zip
 
 ## 构建方法
 
@@ -13,7 +14,9 @@ Action 构建指的是直接使用 GitHub Action 进行编译。
 1. Fork 本项目。
 2. 进入项目的 Actions，选择 CI 开头的 Workflow（根据你需要的操作系统选择）。
 3. 选择 `Run workflow`，填入你要编译的 PHP 版本、目标类型、扩展列表。（扩展列表使用英文逗号分割，例如 `bcmath,curl,mbstring`）
-4. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
+4. 如果需要共享扩展（例如 `xdebug`），请设置 `shared-extensions`（使用英文逗号分割，例如 `xdebug`）。
+5. 如果需要 FrankenPHP，请启用 `build-frankenphp`，同时也需要启用 `enable-zts`。
+6. 等待大约一段时间后，进入对应的任务中，获取 `Artifacts`。
 
 如果你选择了 `debug`，则会在构建时输出所有日志，包括编译的日志，以供排查错误。
 

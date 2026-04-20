@@ -2,35 +2,59 @@
 
 Here will be some questions that you may encounter easily. There are currently many, but I need to take time to organize them.
 
-## Can statically compiled PHP install extensions?
+## What is the path of php.ini ?
 
-Because the principle of installing extensions in PHP under the traditional architecture is to install new extensions using `.so` type dynamic link libraries, 
-and statically linked PHP compiled using this project cannot **directly** install new extensions using dynamic link libraries.
+On Linux, macOS and FreeBSD, the path of `php.ini` is `/usr/local/etc/php/php.ini`.
+On Windows, the path is `C:\windows\php.ini` or the current directory of `php.exe`.
+The directory where to look for `php.ini` can be changed on *nix using the manual build option `--with-config-file-path`.
 
-For the macOS platform, almost all binary files under macOS cannot be linked purely statically, 
-and almost all binary files will link macOS system libraries: `/usr/lib/libresolv.9.dylib` and `/usr/lib/libSystem.B.dylib`.
-So under macOS system, statically compiled php binary files can be used under certain compilation conditions, 
-and dynamic link extensions can be used at the same time:
+In addition, on Linux, macOS and FreeBSD, `.ini` files present in the `/usr/local/etc/php/conf.d` directory will also be loaded.
+On Windows, this path is empty by default.
+The directory can be changed using the manual build option `--with-config-file-scan-dir`.
 
-1. Using the `--no-strip` parameter will not strip information such as debugging symbols from the binary file for use with external Zend extensions such as `Xdebug`.
-2. If you want to compile some Zend extensions, use Homebrew, MacPorts, source code compilation, and install a normal version of PHP on your operating system.
-3. Use the `phpize && ./configure && make` command to compile the extensions you want to use.
-4. Copy the extension file `xxxx.so` to the outside, use the statically compiled PHP binary, for example to use the Xdebug extension: `cd buildroot/bin/ && ./php -d "zend_extension=/path/to/xdebug.so"`.
+`php.ini` will also be searched for in [the other standard locations](https://www.php.net/manual/configuration.file.php). 
+
+## Can statically-compiled PHP install extensions?
+
+Because the principle of installing PHP extensions under the normal mode is to use `.so` type dynamic link library to install new extensions, 
+and we use the static link PHP compiled by this project. However, static linking has different definitions in different operating systems.
+
+First of all, for Linux systems, statically linked binaries will not link the system's dynamic link library. 
+Purely statically linked binaries (`build with -all-static`) cannot load dynamic libraries, so new extensions cannot be added.
+At the same time, in pure static mode, you cannot use extensions such as `ffi` to load external `.so` modules.
+
+You can use the command `ldd buildroot/bin/php` to check whether the binary you built under Linux is purely statically linked.
+
+If you [build GNU libc based PHP](../guide/build-with-glibc), you can use the `ffi` extension to load external `.so` modules and load `.so` extensions with the same ABI.
+
+For example, you can use the following command to build a static PHP binary dynamically linked with glibc, 
+supporting FFI extensions and loading the `xdebug.so` extension of the same PHP version and the same TS type:
 
 ```bash
-# build statically linked php-cli but not stripped
-bin/spc build ffi --build-cli --no-strip
+bin/spc-gnu-docker download --for-extensions=ffi,xml --with-php=8.4
+bin/spc-gnu-docker build ffi,xml --build-cli --debug
+
+buildroot/bin/php -d "zend_extension=/path/to/php{PHP_VER}-{ts/nts}/xdebug.so" --ri xdebug
 ```
 
-For the Linux platform, the current compilation result is a purely statically linked binary file, 
-and new extensions cannot be installed using a dynamic link library.
+For macOS platform, almost all binaries under macOS cannot be truly purely statically linked, and almost all binaries will link macOS system libraries: `/usr/lib/libresolv.9.dylib` and `/usr/lib/libSystem.B.dylib`.
+So on macOS, you can **directly** use SPC to build statically compiled PHP binaries with dynamically linked extensions:
+
+1. Build shared extension `xxx.so` using: `--build-shared=XXX` option. e.g. `bin/spc build bcmath,zlib --build-shared=xdebug --build-cli`
+2. You will get `buildroot/modules/xdebug.so` and `buildroot/bin/php`.
+3. The `xdebug.so` file could be used for php that version and thread-safe are the same.
+
+For the Windows platform, since officially built extensions (such as `php_yaml.dll`) force the use of the `php8.dll` dynamic library as a link, and statically built PHP does not include any dynamic libraries other than system libraries,
+php.exe built by static-php cannot load officially built dynamic extensions. Since static-php-cli does not yet support building dynamic extensions, there is currently no way to load dynamic extensions with static-php.
+
+However, Windows can normally use the `FFI` extension to load other dll files and call them.
 
 ## Can it support Oracle database extension?
 
 Some extensions that rely on closed source libraries, such as `oci8`, `sourceguardian`, etc., 
 they do not provide purely statically compiled dependent library files (`.a`), only dynamic dependent library files (`.so`).
-These extensions cannot be compiled into static-php-cli from source, so this project may never support them. 
-However, in theory, you can access and use such extensions under macOS according to the above questions.
+These extensions cannot be compiled into static-php-cli using source code, so this project may never support these extensions.
+However, in theory you can access and use such extensions under macOS and Linux according to the above questions.
 
 If you have a need for such extensions, or most people have needs for these closed-source extensions,
 see the discussion on [standalone-php-cli](https://github.com/crazywhalecc/static-php-cli/discussions/58). Welcome to leave a message.
@@ -63,6 +87,8 @@ such as Swoole Compiler, Source Guardian, etc.
 
 ## Unable to use ssl
 
+**Update: This issue has been fixed in the latest version of static-php-cli, which now reads the system's certificate file by default. If you still have problems, try the solution below.**
+
 When using curl, pgsql, etc. to request an HTTPS website or establish an SSL connection, there may be an `error:80000002:system library::No such file or directory` error.
 This error is caused by statically compiled PHP without specifying `openssl.cafile` via `php.ini`.
 
@@ -72,3 +98,11 @@ For Linux systems, you can download the [cacert.pem](https://curl.se/docs/caextr
 For the certificate locations of different distros, please refer to [Golang docs](https://go.dev/src/crypto/x509/root_linux.go).
 
 > INI configuration `openssl.cafile` cannot be set dynamically using the `ini_set()` function, because `openssl.cafile` is a `PHP_INI_SYSTEM` type configuration and can only be set in the `php.ini` file.
+
+## Why don't we support older versions of PHP?
+
+Because older versions of PHP have many problems, such as security issues, performance issues, and functional issues. 
+In addition, many older versions of PHP are not compatible with the latest dependency libraries, 
+which is one of the reasons why older versions of PHP are not supported.
+
+You can use older versions compiled earlier by static-php-cli, such as PHP 8.0, but earlier versions will not be explicitly supported.
