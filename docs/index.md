@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "Static PHP"
+  name: "Static PHP (v2)"
   tagline: "Build standalone PHP binary on Linux, macOS, FreeBSD, Windows, with PHP project together, with popular extensions included."
   image:
     src: /images/static-php_nobg.png
@@ -24,6 +24,11 @@ features:
   - title: Dependency Management
     details: static-php-cli comes with dependency management and supports installation of different types of PHP extensions.
 ---
+
+::: warning
+You are reading the documentation for v2 version of StaticPHP.
+We are currently in the alpha stage of v3, which will be released as stable within a few months. You can check it out [here](https://static-php.dev/).
+:::
 
 <script setup>
 import {VPSponsors} from "vitepress/theme";

@@ -1,5 +1,10 @@
 # 指南
 
+::: warning
+您正在阅读 StaticPHP 的 v2 版本文档。
+我们目前正在开发 v3 的 alpha 版本，预计将在几个月内发布稳定版。您可以在 [这里](https://static-php.dev/) 查看。
+:::
+
 static-php-cli 是一个用于构建静态编译的 PHP 二进制的工具，目前支持 Linux 和 macOS 系统。
 
 在指南章节中，你将了解到如何使用 static-php-cli 构建独立的 php 程序。

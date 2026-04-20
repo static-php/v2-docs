@@ -1,5 +1,10 @@
 # Guide
 
+::: warning
+You are reading the documentation for v2 version of StaticPHP.
+We are currently in the alpha stage of v3, which will be released as stable within a few months. You can check it out [here](https://static-php.dev/).
+:::
+
 Static php cli is a tool used to build statically compiled PHP binaries, 
 currently supporting Linux and macOS systems.
 
